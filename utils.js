@@ -13,7 +13,9 @@
         timestampFormat: timestampFormat,
         getChineseMoney: getChineseMoney,
         imgBase64Decode: imgBase64Decode,
-        getBrowser: getBrowser
+        getBrowser: getBrowser,
+	getRandomNum: getRandomNum,
+	getRandomColor: getRandomColor
     };
     window.$Utils = utils;
 
@@ -114,6 +116,29 @@
 			return val;
 		}
 	}
+	
+	/**
+	   * 获取一个随机数
+	   * @param min 最小值
+	   * @param max 最大值
+	   * @returns {number}
+	   */
+	  function getRandomNum(min, max) {
+	    return Math.floor(Math.random() * (max - min) + min);
+	  }
+	
+	/**
+	   * 获取一个随机颜色
+	   * @param min 最小值
+	   * @param max 最大值
+	   * @returns {string}
+	   */
+	  function getRandomColor(min, max) {
+	    var r = this.getRandomNum(min, max);
+	    var g = this.getRandomNum(min, max);
+	    var b = this.getRandomNum(min, max);
+	    return "rgb(" + r + "," + g + "," + b + ")";
+	  }
 
     /**
      * 获取网站根路径地址
@@ -295,8 +320,7 @@
           alipay: u.indexOf('AlipayClient') > -1, //是否为支付宝
           weibo: u.indexOf('Weibo') > -1, //是否为微博
           dingTalk: u.indexOf('DingTalk') > -1, //是否为钉钉
-          qq: u.match(/\sQQ/i) == " qq" //是否为QQ
-
+          qq: u.match(/QQ\//i) == "QQ/" //是否为QQ
         };
       }()
     }
