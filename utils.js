@@ -53,6 +53,7 @@
  *      $Utils.getColor(count); 获取随机的颜色数组
  *      $Utils.sortArr(arr) 数组冒泡排序
  *      $Utils.getChineseMoney(val) 获取大写人命币
+ *      $Utils.getGlobal() 获取宿主环境顶层对象
  */
 // 命名空间
 var $Utils = {};
@@ -741,4 +742,13 @@ $Utils.getChineseMoney = function (val) {
     return s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^$/, '零元') + '整';
 };
 
-
+/**
+ * 获取宿主环境顶层对象
+ * @returns {Object}
+ */
+$Utils.getGlobal = function () {
+  if (typeof self !== 'undefined') { return self; }
+  if (typeof window !== 'undefined') { return window; }
+  if (typeof global !== 'undefined') { return global; }
+  throw new Error('unable to locate global object');
+};
