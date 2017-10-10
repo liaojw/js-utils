@@ -56,6 +56,7 @@
  *      $Utils.formatCurrency(val) 将数值四舍五入(保留2位小数)后格式化成金额形式
  *      $Utils.formatCurrencyTenThou(val) 将数值四舍五入(保留2位小数)后格式化成金额形式
  *      $Utils.getGlobal() 获取宿主环境顶层对象
+ *      $Utils.constantize() 冻结对象
  */
 // 命名空间
 var $Utils = {};
@@ -809,4 +810,17 @@ $Utils.getGlobal = function () {
         return global;
     }
     throw new Error('unable to locate global object');
+};
+
+/**
+ * 冻结一个对象
+ * @param obj
+ */
+$Utils.constantize = function (obj) {
+    Object.freeze(obj);
+    Object.keys(obj).forEach(function (key, i) {
+        if (typeof obj[key] === 'object') {
+            $Utils.constantize(obj[key]);
+        }
+    });
 };
