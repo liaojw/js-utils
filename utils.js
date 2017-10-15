@@ -57,6 +57,7 @@
  *      $Utils.formatCurrencyTenThou(val) 将数值四舍五入(保留2位小数)后格式化成金额形式
  *      $Utils.getGlobal() 获取宿主环境顶层对象
  *      $Utils.constantize() 冻结对象
+ *      $Utils.iteratorEntries() 为对象部署Iterator接口（使对象具有for of循环的能力）
  */
 // 命名空间
 var $Utils = {};
@@ -823,4 +824,14 @@ $Utils.constantize = function (obj) {
             $Utils.constantize(obj[key]);
         }
     });
+};
+
+/**
+ * 为对象部署Iterator接口（使对象具有for of循环的能力）
+ * @param obj
+ */
+$Utils.iteratorEntries = function* (obj) {
+    for (let key of Object.keys(obj)) {
+        yield [key, obj[key]];
+    }
 };
