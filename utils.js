@@ -6,6 +6,7 @@
  *          isEmpty 判断字符串是否为空
  *          isNotEmpty 判断字符串是否不为空
  *          trim 字符串首尾去空格
+ *          getByteLength 获取字符串字节数
  *
  * Object:
  *      $Utils.ajaxUtils 定义一个ajax工具类
@@ -98,6 +99,49 @@ $Utils.strUtils = (function () {
                 return val.replace(/[\s\uFEFF\xa0\u3000]/g, '');
             } else {
                 return val;
+            }
+        },
+
+        getByteLength: function (val, charset) {
+            if (Boolean(val)) {
+                val = val.toString();
+                charset = Boolean(charset) ? charset.toUpperCase() : 'UTF-16';
+                var byteLength = 0;
+                if (charset === 'GBK') {
+                    const reg = /[\u4e00-\u9fa5]/;
+                    for (var i = 0, len = val.length; i < len; i++) {
+                        if (!reg.test(val[i])) {
+                            byteLength += 1;
+                        } else {
+                            byteLength += 2;
+                        }
+                    }
+                } else if (charset === 'UTF-8') {
+                    for (var i = 0, len = val.length; i < len; i++) {
+                        var charCode = val.charCodeAt(i);
+                        if (charCode <= 0x007f) {
+                            byteLength += 1;
+                        } else if (charCode <= 0x07ff) {
+                            byteLength += 2;
+                        } else if (charCode <= 0xffff) {
+                            byteLength += 3;
+                        } else {
+                            byteLength += 4;
+                        }
+                    }
+                } else {
+                    for (var i = 0, len = val.length; i < len; i++) {
+                        var charCode = val.charCodeAt(i);
+                        if (charCode <= 0xffff) {
+                            byteLength += 2;
+                        } else {
+                            byteLength += 4;
+                        }
+                    }
+                }
+                return byteLength;
+            } else {
+                return 0;
             }
         }
     }
