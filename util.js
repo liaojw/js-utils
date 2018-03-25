@@ -187,48 +187,48 @@ Util.eventUtil = (function () {
     /**
      * 给一个元素同时多个事件
      * @param element
-     * @param eventName
-     * @param fn
+     * @param event
+     * @param handler
      */
-    addSeveralEvent(element, eventName, fn) {
-      var oddEvent = element['on' + eventName];
+    addSeveralEvent(element, event, handler) {
+      var oddEvent = element['on' + event];
       if (oddEvent == null) {
-        element['on' + eventName] = fn;
+        element['on' + event] = handler;
       } else {
-        element['on' + eventName] = function () {
+        element['on' + event] = function () {
           oddEvent();
-          fn();
+          handler();
         }
       }
     },
     /**
      * 添加事件
      * @param element
-     * @param eventName
-     * @param fn
+     * @param event
+     * @param handler
      */
-    addEvent(element, eventName, fn) {
+    addEvent(element, event, handler) {
       if (element.addEventListener) {
-        element.addEventListener(eventName, fn, false);
+        element.addEventListener(event, handler, false);
       } else if (element.attachEvent) {
-        element.attachEvent('on' + eventName, fn);
+        element.attachEvent('on' + event, handler);
       } else {
-        element['on' + eventName] = fn;
+        element['on' + event] = handler;
       }
     },
     /**
      * 移除事件
      * @param element 需要绑定事件的元素 Dom Object
-     * @param eventName 需要绑定的事件类型名称 string
-     * @param fn 回调函数 function
+     * @param event 需要绑定的事件类型名称 string
+     * @param handler 回调函数 function
      */
-    removeEvent(element, eventName, fn) {
+    removeEvent(element, event, handler) {
       if (element.removeEventListener) {
-        element.removeEventListener(eventName, fn, false);
+        element.removeEventListener(event, handler, false);
       } else if (element.attachEvent) {
-        element.detachEvent('on' + eventName, fn);
+        element.detachEvent('on' + event, handler);
       } else {
-        element['on' + eventName] = null;
+        element['on' + event] = null;
       }
     }
   };
@@ -465,39 +465,38 @@ Util.formatterUtil = (function () {
 Util.dateUtil = (function () {
   return {
     /**
-     * 获取当前日期时间信息
-     * @returns {{currentDate, currentYear, currentMonth, currentWeek, currentDay, currentHours, currentMinutes, currentSeconds, currentDateInfo, currentDateTimeInfo, currentTime}}
-     */
-    getCurrentDateInfo() {
-      var currentDate, currentYear, currentMonth, currentWeek, currentDay, currentHours, currentMinutes, currentSeconds,
-        currentTime;
-      currentDate = new Date();
-      currentYear = currentDate.getFullYear();
-      currentMonth = currentDate.getMonth() + 1;
-      currentMonth = (currentMonth > 9) ? currentMonth : `0${currentMonth}`;
-      currentWeek = currentDate.getDay();
-      currentDay = currentDate.getDate();
-      currentDay = (currentDay > 9) ? currentDay : `0${currentDay}`;
-      currentHours = currentDate.getHours();
-      currentHours = (currentHours > 9) ? currentHours : `0${currentHours}`;
-      currentMinutes = currentDate.getMinutes();
-      currentMinutes = (currentMinutes > 9) ? currentMinutes : `0${currentMinutes}`;
-      currentSeconds = currentDate.getSeconds();
-      currentSeconds = (currentSeconds > 9) ? currentSeconds : `0${currentSeconds}`;
-      currentTime = currentDate.getTime();
+   * 获取日期时间信息
+   * @param val
+   */
+    getDateInfo(val) {
+      var date, year, month, week, day, hours, minutes, seconds, time;
+      date = Boolean(val) ? new Date(val) : new Date();
+      year = date.getFullYear();
+      month = date.getMonth() + 1;
+      month = (month > 9) ? month : `0${month}`;
+      week = date.getDay();
+      day = date.getDate();
+      day = (day > 9) ? day : `0${day}`;
+      hours = date.getHours();
+      hours = (hours > 9) ? hours : `0${hours}`;
+      minutes = date.getMinutes();
+      minutes = (minutes > 9) ? minutes : `0${minutes}`;
+      seconds = date.getSeconds();
+      seconds = (seconds > 9) ? seconds : `0${seconds}`;
+      time = date.getTime();
       return (function () {
         return {
-          currentDate: currentDate,
-          currentYear: currentDate.getFullYear(),
-          currentMonth: currentDate.getMonth() + 1,
-          currentWeek: currentWeek,
-          currentDay: currentDate.getDate(),
-          currentHours: currentHours,
-          currentMinutes: currentMinutes,
-          currentSeconds: currentSeconds,
-          currentDateInfo: `${currentYear}-${currentMonth}-${currentDay}`,
-          currentDateTimeInfo: `${currentYear}-${currentMonth}-${currentDay} ${currentHours}:${currentMinutes}:${currentSeconds}`,
-          currentTime: currentTime
+          date: date,
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          week: week,
+          day: date.getDate(),
+          hours: date.getHours(),
+          minutes: date.getMinutes(),
+          seconds: date.getSeconds(),
+          dateInfo: `${year}-${month}-${day}`,
+          dateTimeInfo: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`,
+          time: time
         };
       })();
     }
