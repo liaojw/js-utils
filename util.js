@@ -127,7 +127,7 @@ Util.objectUtil = (function () {
      */
     copyProperties(target = {}, source = {}) {
       Object.keys(target).forEach(e => {
-        target[e] = this.isNotEmpty(source[e]) ? source[e] : target[e];
+        target[e] = e in source ? source[e] : target[e];
       });
       return target;
     },
@@ -170,7 +170,8 @@ Util.objectUtil = (function () {
     /**
      * 部署Iterator接口（使对象具有for of循环的能力）
      * @param obj
-     */* iteratorEntries(obj) {
+     */
+    * iteratorEntries(obj) {
       for (let key of Object.keys(obj)) {
         yield [key, obj[key]];
       }
@@ -207,30 +208,42 @@ Util.eventUtil = (function () {
      * @param event
      * @param handler
      */
-    addEvent(element, event, handler) {
-      if (element.addEventListener) {
-        element.addEventListener(event, handler, false);
-      } else if (element.attachEvent) {
-        element.attachEvent('on' + event, handler);
+    addEvent: (function () {
+      if (document.addEventListener) {
+        return function (element, event, handler) {
+          element.addEventListener(event, handler, false);
+        }
+      } else if (document.attachEvent) {
+        return function (element, event, handler) {
+          element.attachEvent('on' + event, handler);
+        }
       } else {
-        element['on' + event] = handler;
+        return function (element, event, handler) {
+          element['on' + event] = handler;
+        }
       }
-    },
+    })(),
     /**
      * 移除事件
      * @param element 需要绑定事件的元素 Dom Object
      * @param event 需要绑定的事件类型名称 string
      * @param handler 回调函数 function
      */
-    removeEvent(element, event, handler) {
-      if (element.removeEventListener) {
-        element.removeEventListener(event, handler, false);
-      } else if (element.attachEvent) {
-        element.detachEvent('on' + event, handler);
+    removeEvent: (function () {
+      if (document.removeEventListener) {
+        return function (element, event, handler) {
+          element.removeEventListener(event, handler, false);
+        }
+      } else if (document.detachEvent) {
+        return function (element, event, handler) {
+          element.detachEvent('on' + event, handler);
+        }
       } else {
-        element['on' + event] = null;
+        return function (element, event, handler) {
+          element['on' + event] = null;
+        }
       }
-    }
+    })(),
   };
 })();
 
@@ -418,7 +431,10 @@ Util.formatterUtil = (function () {
     formatterRMB(val = '') {
       const fraction = ['角', '分'];
       const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
-      const unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']];
+      const unit = [
+        ['元', '万', '亿'],
+        ['', '拾', '佰', '仟']
+      ];
       const head = val < 0 ? '（负数）' : '';
       val = Math.abs(val);
       var str = '';
@@ -465,9 +481,9 @@ Util.formatterUtil = (function () {
 Util.dateUtil = (function () {
   return {
     /**
-   * 获取日期时间信息
-   * @param val
-   */
+     * 获取日期时间信息
+     * @param val
+     */
     getDateInfo(val) {
       var date, year, month, week, day, hours, minutes, seconds, time;
       date = Boolean(val) ? new Date(val) : new Date();
