@@ -150,8 +150,7 @@ Util.objectUtil = (function () {
       return target;
     },
     /**
-     * 深度克隆
-     * 
+     * 对象深度克隆
      * @param {any} [target={}] 
      * @param {any} [source={}] 
      * @returns 
@@ -172,27 +171,27 @@ Util.objectUtil = (function () {
       return target;
     },
     /**
-     * 继承
+     * 对象继承
      * @param sub
      * @param sup
      */
-    extend(sub = {}, sup = {}) {
+    extend(target = {}, source = {}) {
       //目的：需要实现只继承父类的原型对象
       //1 需要创建一个空函数  目的： 中转
       var F = new Function();
       //2 实现空函数的原型对象和超类的原型对象转换
-      F.prototype = sup.prototype;
+      F.prototype = source.prototype;
       //3 原型继承
-      sub.prototype = new F();
+      target.prototype = new F();
       //4 还原子类的构造器
-      sub.prototype.constructor = sub;
+      target.prototype.constructor = target;
       // 保存父类的原型对象 目的：一方面方便解耦； 另一方面可以轻松的获得父类的原型对象
       //5 自定义一个子类的静态属性接收父类的原型对象
-      sub.superClass = sup.prototype;
+      target.superClass = source.prototype;
       //6 为防止父类的constructor属性的设置落下，在extend()方法中加保险
-      if (sup.prototype.constructor == Object.prototype.constructor) {
+      if (source.prototype.constructor == Object.prototype.constructor) {
         //手动的还原原型对象的构造器
-        sup.prototype.constructor = sup;
+        source.prototype.constructor = source;
       }
     },
     /**
