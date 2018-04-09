@@ -66,6 +66,24 @@ Util.strUtil = (function () {
         return 0;
       }
     },
+    /**
+     * 获取HashCode
+     * 
+     * @param {string} [val=''] 
+     * @returns 
+     */
+    getHashCode(val = '') {
+      var hash = 0;
+      if (val.length === 0) {
+        return hash;
+      }
+      for (let i = 0, len = val.length; i < len; i++) {
+        var char = val.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return hash;
+    }
   };
 })();
 
@@ -129,6 +147,28 @@ Util.objectUtil = (function () {
       Object.keys(target).forEach(e => {
         target[e] = e in source ? source[e] : target[e];
       });
+      return target;
+    },
+    /**
+     * 深度克隆
+     * 
+     * @param {any} [target={}] 
+     * @param {any} [source={}] 
+     * @returns 
+     */
+    cloneDeep(target = {}, source = {}) {
+      var i, toStr = Object.prototype.toString,
+        astr = '[object Array]';
+      for (i in source) {
+        if (source.hasOwnProperty(i)) {
+          if (typeof source[i] === 'object') {
+            target[i] = (toStr.call(source[i]) === astr) ? [] : {};
+            this.cloneDeep(target[i], source[i]);
+          } else {
+            target[i] = source[i];
+          }
+        }
+      }
       return target;
     },
     /**
