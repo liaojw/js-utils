@@ -249,15 +249,15 @@ Util.eventUtil = (function () {
      */
     addEvent: (function () {
       if (document.addEventListener) {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element.addEventListener(event, handler, false);
         }
       } else if (document.attachEvent) {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element.attachEvent('on' + event, handler);
         }
       } else {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element['on' + event] = handler;
         }
       }
@@ -270,15 +270,15 @@ Util.eventUtil = (function () {
      */
     removeEvent: (function () {
       if (document.removeEventListener) {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element.removeEventListener(event, handler, false);
         }
       } else if (document.detachEvent) {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element.detachEvent('on' + event, handler);
         }
       } else {
-        return function (element, event, handler) {
+        return (element, event, handler) => {
           element['on' + event] = null;
         }
       }
