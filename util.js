@@ -283,6 +283,42 @@ Util.eventUtil = (function () {
         }
       }
     })(),
+    /**
+     * 获取Event
+     * @param {*} event 
+     */
+    getEvent(event) {
+      return event ? event : window.event;
+    },
+    /**
+     * 获取事件来源
+     * @param {*} event 
+     */
+    getTarget(event) {
+      return event.target || event.srcElement;
+    },
+    /**
+     * 阻止默认行为
+     * @param {*} event 
+     */
+    preventDefault(event) {
+      if (event.preventDefault) {
+        event.preventDefault();
+      } else {
+        event.returnValue = false;
+      }
+    },
+    /**
+     * 阻止冒泡
+     * @param {*} event 
+     */
+    stopPropagation(event) {
+      if (event.stopPropagation) {
+        event.stopPropagation();
+      } else {
+        event.cancelBubble = true;
+      }
+    }
   };
 })();
 
