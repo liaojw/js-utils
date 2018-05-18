@@ -73,12 +73,12 @@ Util.strUtil = (function () {
      * @returns 
      */
     getHashCode(val = '') {
-      var hash = 0;
+      let hash = 0;
       if (val.length === 0) {
         return hash;
       }
       for (let i = 0, len = val.length; i < len; i++) {
-        var char = val.charCodeAt(i);
+        let char = val.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
       }
