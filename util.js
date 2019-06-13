@@ -1,5 +1,4 @@
 export default {
-
   /**
    * 判断是否为空
    * @param value
@@ -386,11 +385,13 @@ export default {
    * @param {*} source
    */
   copyDeep(target = {}, source = {}) {
-    let i, toStr = Object.prototype.toString, astr = '[object Array]';
+    let i,
+      toStr = Object.prototype.toString,
+      astr = '[object Array]';
     for (i in source) {
       if (source.hasOwnProperty(i)) {
         if (typeof source[i] === 'object') {
-          target[i] = (toStr.call(source[i]) === astr) ? [] : {};
+          target[i] = toStr.call(source[i]) === astr ? [] : {};
           this.copyDeep(target[i], source[i]);
         } else {
           target[i] = source[i];
@@ -426,16 +427,43 @@ export default {
   },
 
   /**
-   * 冻结对象
+   * 深度封闭对象
    * @param obj
+   * @return {object}
    */
-  freeze(obj) {
-    Object.freeze(obj);
-    Object.keys(obj).forEach((key) => {
-      if (typeof obj[key] === 'object') {
-        this.freeze(obj[key]);
+  sealDeep(obj) {
+    // 取回定义在obj上的属性名
+    let propNames = Object.getOwnPropertyNames(obj);
+    // 在冻结自身之前封闭属性
+    propNames.forEach(e => {
+      let prop = obj[e];
+      // 如果prop是个对象，封闭它
+      if (typeof prop === 'object' && prop !== null) {
+        this.sealDeep(prop);
       }
     });
+    // 封闭自身(no-op if already frozen)
+    return Object.seal(obj);
+  },
+
+  /**
+   * 深度冻结对象
+   * @param obj
+   * @return {object}
+   */
+  freezeDeep(obj) {
+    // 取回定义在obj上的属性名
+    let propNames = Object.getOwnPropertyNames(obj);
+    // 在冻结自身之前冻结属性
+    propNames.forEach(e => {
+      let prop = obj[e];
+      // 如果prop是个对象，冻结它
+      if (typeof prop === 'object' && prop !== null) {
+        this.freezeDeep(prop);
+      }
+    });
+    // 冻结自身(no-op if already frozen)
+    return Object.freeze(obj);
   },
 
   /**
@@ -445,7 +473,9 @@ export default {
    * @returns {string}
    */
   getAttribute(element, attr) {
-    return element.currentStyle ? element.currentStyle[attr] : window.getComputedStyle(element, null)[attr];
+    return element.currentStyle
+      ? element.currentStyle[attr]
+      : window.getComputedStyle(element, null)[attr];
   },
 
   /**
@@ -723,11 +753,15 @@ export default {
   getUrlParameters() {
     let query = location.search.substring(1);
     let entries = query.split('&');
-    return Array.prototype.reduce.call(entries, function (obj, item) {
-      var param = item.split('=');
-      obj[param[0]] = param[1];
-      return obj;
-    }, {});
+    return Array.prototype.reduce.call(
+      entries,
+      function(obj, item) {
+        var param = item.split('=');
+        obj[param[0]] = param[1];
+        return obj;
+      },
+      {}
+    );
   },
 
   /**
