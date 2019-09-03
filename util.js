@@ -416,7 +416,7 @@ export default {
       let result = source.constructor();
       for (let i in source) {
         if (source.hasOwnProperty(i)) {
-          result[i] = ['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source)) ? this.cloneDeep(source[i]) : source[i]
+          result[i] = ['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source)) ? this.cloneDeep(source[i]) : source[i];
         }
       }
       return result;
