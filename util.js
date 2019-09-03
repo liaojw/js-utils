@@ -60,7 +60,7 @@ export default {
     }
     value = value.toString();
     let head = '';
-    if (_.startsWith(value, '-')) {
+    if (value.startsWith('-')) {
       head = '负';
       value = value.substr(1);
     }
@@ -345,8 +345,8 @@ export default {
    * @returns {boolean}
    */
   includeAll(allArray, subArray) {
-    return _.every(subArray, item => {
-      return allArray.includes(item);
+    return subArray.every(e => {
+      return allArray.includes(e);
     });
   },
 
@@ -356,7 +356,7 @@ export default {
    * @param other
    * @returns {boolean}
    */
-  floatEqual(value = 0, other = 0) {
+  floatEqual(value, other) {
     value = Number(value);
     other = Number(other);
     if (isNaN(value) || isNaN(other)) {
@@ -372,7 +372,10 @@ export default {
    * @param source
    * @returns {object}
    */
-  copyProperties(target = {}, source = {}) {
+  copyProperties(target, source) {
+    if (!target || !source) {
+      return target;
+    }
     for (let e in target) {
       target[e] = e in source ? source[e] : target[e];
     }
@@ -381,32 +384,53 @@ export default {
 
   /**
    * 深度复制对象
-   * @param {*} target
    * @param {*} source
+   * @param {*} target
+   * @returns {object}
    */
-  copyDeep(target = {}, source = {}) {
-    let i,
-      toStr = Object.prototype.toString,
-      astr = '[object Array]';
-    for (i in source) {
-      if (source.hasOwnProperty(i)) {
-        if (typeof source[i] === 'object') {
-          target[i] = toStr.call(source[i]) === astr ? [] : {};
-          this.copyDeep(target[i], source[i]);
-        } else {
-          target[i] = source[i];
+  copyDeep(source, target = {}) {
+    if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source))) {
+      for (let i in source) {
+        if (source.hasOwnProperty(i)) {
+          if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source[i]))) {
+            target[i] = Array.isArray(source[i]) ? [] : {};
+            this.copyDeep(source[i], target[i]);
+          } else {
+            target[i] = source[i];
+          }
         }
       }
+      return target;
+    } else {
+      return source;
     }
-    return target;
+  },
+
+  /**
+   * 深度克隆对象
+   * @param {*} source
+   * @returns {object}
+   */
+  cloneDeep(source) {
+    if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source))) {
+      let result = source.constructor();
+      for (let i in source) {
+        if (source.hasOwnProperty(i)) {
+          result[i] = ['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source)) ? this.cloneDeep(source[i]) : source[i]
+        }
+      }
+      return result;
+    } else {
+      return source;
+    }
   },
 
   /**
    * 对象继承
-   * @param sub
-   * @param sup
+   * @param target
+   * @param source
    */
-  extend(target = {}, source = {}) {
+  extend(target, source) {
     //目的：需要实现只继承父类的原型对象
     //1 需要创建一个空函数  目的： 中转
     let F = new Function();
