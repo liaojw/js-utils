@@ -1,5 +1,15 @@
 export default {
   /**
+   * 转换成数字类型
+   * @param value
+   * @returns {number}
+   */
+  toNumber(value) {
+    value = Number(value);
+    return isNaN(value) ? 0 : value;
+  },
+
+  /**
    * 判断是否为空
    * @param value
    * @returns {boolean}
@@ -37,6 +47,42 @@ export default {
   },
 
   /**
+   * 判断是否全部为空
+   * @param value
+   * @returns {boolean}
+   */
+  everyEmpty(...value) {
+    return value.every((e) => this.isEmpty(e));
+  },
+
+  /**
+   * 判断是否全部不为空
+   * @param value
+   * @returns {boolean}
+   */
+  everyNotEmpty(...value) {
+    return value.every((e) => this.isNotEmpty(e));
+  },
+
+  /**
+   * 判断是否有一个为空
+   * @param value
+   * @returns {boolean}
+   */
+  someEmpty(...value) {
+    return value.some((e) => this.isEmpty(e));
+  },
+
+  /**
+   * 判断是否有一个不为空
+   * @param value
+   * @returns {boolean}
+   */
+  someNotEmpty(...value) {
+    return value.some((e) => this.isNotEmpty(e));
+  },
+
+  /**
    * 字符串去空格
    * @param value
    * @returns {string}
@@ -70,7 +116,7 @@ export default {
     }
     if (
       value.match(
-        /^((\d{1,3}(,\d{3})*(.((\d{3},)*\d{1,3}))?)|(\d+(.\d+)?))$/
+        /^((\d{1,3}(,\d{3})*(.((\d{3},)*\d{1,3}))?)|(\d+(.\d+)?))$/,
       ) === null
     ) {
       console.error('输入有误!');
@@ -134,7 +180,7 @@ export default {
       CN_SIX,
       CN_SEVEN,
       CN_EIGHT,
-      CN_NINE
+      CN_NINE,
     );
     radices = new Array('', CN_TEN, CN_HUNDRED, CN_THOUSAND);
     bigRadices = new Array('', CN_TEN_THOUSAND, CN_HUNDRED_MILLION);
@@ -204,8 +250,8 @@ export default {
             '' +
             parseFloat(
               Math[roundtag](parseFloat((n * k).toFixed(prec * 2))).toFixed(
-                prec * 2
-              )
+                prec * 2,
+              ),
             ) /
               k
           );
@@ -231,7 +277,7 @@ export default {
    * @param {*} value
    * @returns {string}
    */
-  getHashCode: (function() {
+  getHashCode: (function () {
     function pad(hash, len) {
       while (hash.length < len) {
         hash = '0' + hash;
@@ -255,9 +301,7 @@ export default {
     }
 
     function foldObject(hash, o, seen) {
-      return Object.keys(o)
-        .sort()
-        .reduce(foldKey, hash);
+      return Object.keys(o).sort().reduce(foldKey, hash);
       function foldKey(hash, key) {
         return foldValue(hash, o[key], key, seen);
       }
@@ -284,7 +328,7 @@ export default {
     function toString(o) {
       return Object.prototype.toString.call(o);
     }
-    return value => {
+    return (value) => {
       return pad(foldValue(0, value, '', []).toString(16), 8);
     };
   })(),
@@ -345,9 +389,7 @@ export default {
    * @returns {boolean}
    */
   includeAll(allArray, subArray) {
-    return subArray.every(e => {
-      return allArray.includes(e);
-    });
+    return subArray.every((e) => allArray.includes(e));
   },
 
   /**
@@ -367,7 +409,7 @@ export default {
   },
 
   /**
-   * 复制属性
+   * 复制属性方法
    * @param target
    * @param source
    * @returns {object}
@@ -389,10 +431,18 @@ export default {
    * @returns {object}
    */
   copyDeep(source, target = {}) {
-    if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source))) {
+    if (
+      ['[object Object]', '[object Array]'].includes(
+        Object.prototype.toString.call(source),
+      )
+    ) {
       for (let i in source) {
         if (source.hasOwnProperty(i)) {
-          if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source[i]))) {
+          if (
+            ['[object Object]', '[object Array]'].includes(
+              Object.prototype.toString.call(source[i]),
+            )
+          ) {
             target[i] = Array.isArray(source[i]) ? [] : {};
             this.copyDeep(source[i], target[i]);
           } else {
@@ -412,11 +462,19 @@ export default {
    * @returns {object}
    */
   cloneDeep(source) {
-    if (['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source))) {
+    if (
+      ['[object Object]', '[object Array]'].includes(
+        Object.prototype.toString.call(source),
+      )
+    ) {
       let result = source.constructor();
       for (let i in source) {
         if (source.hasOwnProperty(i)) {
-          result[i] = ['[object Object]', '[object Array]'].includes(Object.prototype.toString.call(source)) ? this.cloneDeep(source[i]) : source[i];
+          result[i] = ['[object Object]', '[object Array]'].includes(
+            Object.prototype.toString.call(source),
+          )
+            ? this.cloneDeep(source[i])
+            : source[i];
         }
       }
       return result;
@@ -456,10 +514,13 @@ export default {
    * @return {object}
    */
   sealDeep(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+      return obj;
+    }
     // 取回定义在obj上的属性名
     let propNames = Object.getOwnPropertyNames(obj);
     // 在冻结自身之前封闭属性
-    propNames.forEach(e => {
+    propNames.forEach((e) => {
       let prop = obj[e];
       // 如果prop是个对象，封闭它
       if (typeof prop === 'object' && prop !== null) {
@@ -476,10 +537,13 @@ export default {
    * @return {object}
    */
   freezeDeep(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+      return obj;
+    }
     // 取回定义在obj上的属性名
     let propNames = Object.getOwnPropertyNames(obj);
     // 在冻结自身之前冻结属性
-    propNames.forEach(e => {
+    propNames.forEach((e) => {
       let prop = obj[e];
       // 如果prop是个对象，冻结它
       if (typeof prop === 'object' && prop !== null) {
@@ -568,7 +632,7 @@ export default {
    * @param event
    * @param handler
    */
-  addEvent: (function() {
+  addEvent: (function () {
     if (document.addEventListener) {
       return (element, event, handler) => {
         element.addEventListener(event, handler, false);
@@ -590,7 +654,7 @@ export default {
    * @param event
    * @param handler
    */
-  removeEvent: (function() {
+  removeEvent: (function () {
     if (document.removeEventListener) {
       return (element, event, handler) => {
         element.removeEventListener(event, handler, false);
@@ -702,13 +766,55 @@ export default {
         ', top=' +
         top +
         ', left=' +
-        left
+        left,
     );
 
     // Puts focus on the newWindow
     if (window.focus) {
       newWindow.focus();
     }
+  },
+
+  /**
+   * 设置垂直滚动高度
+   * @param {*} el
+   * @param {number} [from=0]
+   * @param {*} to
+   * @param {number} [duration=500]
+   * @param {*} endCallback
+   */
+  scrollTop(el, from = 0, to, duration = 500, endCallback) {
+    if (!window.requestAnimationFrame) {
+      window.requestAnimationFrame =
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+          return window.setTimeout(callback, 1000 / 60);
+        };
+    }
+    const difference = Math.abs(from - to);
+    const step = Math.ceil((difference / duration) * 50);
+
+    function scroll(start, end, step) {
+      if (start === end) {
+        endCallback && endCallback();
+        return;
+      }
+
+      let d = start + step > end ? end : start + step;
+      if (start > end) {
+        d = start - step < end ? end : start - step;
+      }
+
+      if (el === window) {
+        window.scrollTo(d, d);
+      } else {
+        el.scrollTop = d;
+      }
+      window.requestAnimationFrame(() => scroll(d, end, step));
+    }
+    scroll(from, to, step);
   },
 
   /**
@@ -733,12 +839,21 @@ export default {
    * @returns {object}
    */
   getBrowser() {
+    let operatingSystem = '';
+    let agent = navigator.userAgent.toLowerCase();
+    if (/macintosh|mac os x/i.test(agent)) {
+      operatingSystem = 'mac';
+    } else if (agent.indexOf('win32') >= 0 || agent.indexOf('wow32') >= 0) {
+      operatingSystem = '32';
+    } else if (agent.indexOf('win64') >= 0 || agent.indexOf('wow64') >= 0) {
+      operatingSystem = '64';
+    }
     return {
       navigator: navigator,
       appVersion: navigator.appVersion,
       userAgent: navigator.userAgent,
       language: (navigator.browserLanguage || navigator.language).toLowerCase(),
-      versions: (function() {
+      versions: (function () {
         let u = navigator.userAgent;
         return {
           trident: u.includes('Trident'), //IE内核
@@ -764,28 +879,103 @@ export default {
           alipay: u.includes('AlipayClient'), //是否为支付宝
           weibo: u.includes('Weibo'), //是否为微博
           dingTalk: u.includes('DingTalk'), //是否为钉钉
-          qq: u.match(/QQ\//i) === 'QQ/' //是否为QQ
+          govDingTalk: u.includes('TaurusApp') || u.includes('saas'), //是否为政务钉钉
+          qq: !!u.match(/QQ\//i), //是否为QQ
+          operatingSystem: operatingSystem, // 电脑操作系统 32/64/mac
         };
-      })()
+      })(),
     };
   },
 
   /**
-   * 获取URL参数
+   * 获取所有的参数
    * @returns {*}
    */
-  getUrlParameters() {
-    let query = location.search.substring(1);
+  getAllParams() {
+    let query = window.location.search.substring(1);
     let entries = query.split('&');
     return Array.prototype.reduce.call(
       entries,
-      function(obj, item) {
+      function (obj, item) {
         var param = item.split('=');
         obj[param[0]] = param[1];
         return obj;
       },
-      {}
+      {},
     );
+  },
+
+  /**
+   * 获取所有的URL参数
+   * @param {*} url
+   * @returns {object}
+   */
+  getUrlParams(url) {
+    // 用JS拿到URL，如果函数接收了URL，那就用函数的参数。如果没传参，就使用当前页面的URL
+    var queryString = url ? url.split('?')[1] : window.location.search.slice(1);
+    // 用来存储我们所有的参数
+    var obj = {};
+    // 如果没有传参，返回一个空对象
+    if (!queryString) {
+      return obj;
+    }
+    // stuff after # is not part of query string, so get rid of it
+    queryString = queryString.split('#')[0];
+    // 将参数分成数组
+    var arr = queryString.split('&');
+    for (var i = 0; i < arr.length; i++) {
+      // 分离成key:value的形式
+      var a = arr[i].split('=');
+      // 将undefined标记为true
+      var paramName = a[0];
+      var paramValue = typeof a[1] === 'undefined' ? true : a[1];
+      // 如果paramName以方括号结束, e.g. colors[] or colors[2]
+      if (paramName.match(/\[(\d+)?\]$/)) {
+        // 如果paramName不存在，则创建key
+        var key = paramName.replace(/\[(\d+)?\]/, '');
+        if (!obj[key]) {
+          obj[key] = [];
+        }
+        // 如果是索引数组 e.g. colors[2]
+        if (paramName.match(/\[\d+\]$/)) {
+          // 获取索引值并在对应的位置添加值
+          var index = /\[(\d+)\]/.exec(paramName)[1];
+          obj[key][index] = paramValue;
+        } else {
+          // 如果是其它的类型，也放到数组中
+          obj[key].push(paramValue);
+        }
+      } else {
+        // 处理字符串类型
+        if (!obj[paramName]) {
+          // 如果如果paramName不存在，则创建对象的属性
+          obj[paramName] = paramValue;
+        } else if (obj[paramName] && typeof obj[paramName] === 'string') {
+          // 如果属性存在，并且是个字符串，那么就转换为数组
+          obj[paramName] = [obj[paramName]];
+          obj[paramName].push(paramValue);
+        } else {
+          // 如果是其它的类型，还是往数组里丢
+          obj[paramName].push(paramValue);
+        }
+      }
+    }
+    return obj;
+  },
+
+  /**
+   * 获取指定的URL参数
+   * @param {*} key
+   * @returns {string}
+   */
+  getUrlParam(key) {
+    var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)');
+    var r = window.location.search.substring(1).match(reg);
+    if (r != null) {
+      return decodeURIComponent(r[2]);
+    } else {
+      return null;
+    }
   },
 
   /**
@@ -809,7 +999,7 @@ export default {
     seconds = date.getSeconds();
     seconds = seconds > 9 ? seconds : `0${seconds}`;
     time = date.getTime();
-    return (function() {
+    return (function () {
       return {
         date: date,
         year: date.getFullYear(),
@@ -822,7 +1012,7 @@ export default {
         dateInfo: `${year}-${month}-${day}`,
         timeInfo: `${hours}:${minutes}:${seconds}`,
         dateTimeInfo: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`,
-        time: time
+        time: time,
       };
     })();
   },
@@ -861,5 +1051,13 @@ export default {
     let g = this.getRandomNum(min, max);
     let b = this.getRandomNum(min, max);
     return 'rgb(' + r + ',' + g + ',' + b + ')';
-  }
+  },
+
+  /**
+   * 生成短Id
+   * @returns {number}
+   */
+  generateShortId() {
+    return parseInt(Math.random() * 1e10);
+  },
 };
