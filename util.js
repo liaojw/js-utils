@@ -10,6 +10,28 @@ export default {
   },
 
   /**
+   * 保留小数位数（返回字符串）
+   * @param {*} value 
+   * @param {*} digits 
+   */
+  toFixed(value, digits = 2) {
+    if (util.isNotEmpty(value)) {
+      let k = Math.pow(10, digits);
+      return (
+        '' +
+        Number.parseFloat(
+          Math.round(
+            Number.parseFloat((value * k).toFixed(digits * 2)),
+          ).toFixed(digits * 2),
+        ) /
+          k
+      );
+    } else {
+      return '';
+    }
+  },
+
+  /**
    * 判断是否为空
    * @param value
    * @returns {boolean}
