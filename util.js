@@ -11,8 +11,8 @@ export default {
 
   /**
    * 保留小数位数（返回字符串）
-   * @param {*} value 
-   * @param {*} digits 
+   * @param {*} value
+   * @param {*} digits
    */
   toFixed(value, digits = 2) {
     if (util.isNotEmpty(value)) {
@@ -1007,6 +1007,9 @@ export default {
    */
   getDateInfo(value) {
     let date, year, month, week, day, hours, minutes, seconds, time;
+    if (typeof value === 'string') {
+      value = value.replace(/-/g, '/');
+    }
     date = this.isNotEmpty(value) ? new Date(value) : new Date();
     year = date.getFullYear();
     month = date.getMonth() + 1;
@@ -1050,6 +1053,18 @@ export default {
       window.location.hostname +
       (window.location.port ? ':' + window.location.port : '')
     );
+  },
+
+  /**
+   * 获取应用上下文路径
+   * 例如：http://localhost:3000/orange/#/index 返回 '/orange/'
+   * @returns {string}
+   */
+  getContextPath() {
+    let pathName = window.location.pathname;
+    let index = pathName.substr(1).indexOf('/');
+    let result = pathName.substr(0, index + 1);
+    return result + '/';
   },
 
   /**
