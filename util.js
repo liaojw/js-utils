@@ -1001,6 +1001,25 @@ export default {
   },
 
   /**
+   * 拼接参数
+   * @param {*} url
+   * @param {*} params
+   * @returns
+   */
+  parseParams(url, params = {}) {
+    const paramsArray = [];
+    Object.keys(params).forEach(
+      (key) => params[key] && paramsArray.push(`${key}=${params[key]}`),
+    );
+    if (url.search(/\?/) === -1) {
+      url += `?${paramsArray.join('&')}`;
+    } else {
+      url += `&${paramsArray.join('&')}`;
+    }
+    return url;
+  },
+
+  /**
    * 获取日期时间信息
    * @param value
    * @returns {object}
