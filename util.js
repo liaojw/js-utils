@@ -32,6 +32,20 @@ export default {
   },
 
   /**
+   * 获取一个字符在字符串中第几次出现的索引（num从0开始，第一次传0）
+   * @param {*} value
+   * @param {*} char
+   * @param {*} num
+   */
+  findManyIndex(value, char, num = 0) {
+    let index = value.indexOf(char);
+    for (let i = 0; i < num; i++) {
+      index = value.indexOf(char, index + 1);
+    }
+    return index;
+  },
+
+  /**
    * 判断是否为空
    * @param value
    * @returns {boolean}
@@ -693,6 +707,36 @@ export default {
   })(),
 
   /**
+   * 获取事件冒泡路径，兼容ie11,edge,chrome,firefox,safari
+   * @param evt
+   * @returns {*}
+   */
+  getEventPath(evt) {
+    const path = evt.path || (evt.composedPath && evt.composedPath()),
+      target = evt.target;
+    if (this.isNotEmpty(path) && Array.isArray(path) && path.length > 0) {
+      return path.indexOf(window) < 0 ? path.concat(window) : path;
+    }
+
+    if (target === window) {
+      return [window];
+    }
+
+    function getParents(node, memo) {
+      memo = memo || [];
+      const parentNode = node.parentNode;
+
+      if (!parentNode) {
+        return memo;
+      } else {
+        return getParents(parentNode, memo.concat(parentNode));
+      }
+    }
+
+    return [target].concat(getParents(target), window);
+  },
+
+  /**
    * 获取Event
    * @param event
    * @returns {object}
@@ -708,6 +752,59 @@ export default {
    */
   getTarget(event) {
     return event.target || event.srcElement;
+  },
+
+  /**
+   * 派发一个键盘事件
+   * @param {*} el
+   * @param {*} type
+   * @param {*} keyCode
+   */
+  dispatchKeyEvent(el, type, keyCode) {
+    let evtObj;
+    if (document.createEvent) {
+      if (window.KeyEvent) {
+        //firefox 浏览器下模拟事件
+        evtObj = document.createEvent('KeyEvents');
+        evtObj.initKeyEvent(
+          type,
+          true,
+          true,
+          window,
+          true,
+          false,
+          false,
+          false,
+          keyCode,
+          0,
+        );
+      } else {
+        //chrome 浏览器下模拟事件
+        evtObj = document.createEvent('UIEvents');
+        evtObj.initUIEvent(type, true, true, window, 1);
+
+        delete evtObj.keyCode;
+        if (typeof evtObj.keyCode === 'undefined') {
+          //为了模拟keycode
+          Object.defineProperty(evtObj, 'keyCode', { value: keyCode });
+        } else {
+          evtObj.key = String.fromCharCode(keyCode);
+        }
+
+        if (typeof evtObj.ctrlKey === 'undefined') {
+          //为了模拟ctrl键
+          Object.defineProperty(evtObj, 'ctrlKey', { value: true });
+        } else {
+          evtObj.ctrlKey = true;
+        }
+      }
+      el.dispatchEvent(evtObj);
+    } else if (document.createEventObject) {
+      //IE 浏览器下模拟事件
+      evtObj = document.createEventObject();
+      evtObj.keyCode = keyCode;
+      el.fireEvent('on' + type, evtObj);
+    }
   },
 
   /**
@@ -1115,5 +1212,236 @@ export default {
    */
   generateShortId() {
     return parseInt(Math.random() * 1e10);
+  },
+
+  /**
+   * 生成UUID
+   * @returns {string}
+   */
+  generateUUID() {
+    let s = [];
+    let hexDigits = '0123456789abcdef';
+    for (let i = 0; i < 36; i++) {
+      s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+    s[14] = '4'; // bits 12-15 of the time_hi_and_version field to 0010
+    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+    s[8] = s[13] = s[18] = s[23] = '-';
+    let uuid = s.join('');
+    return uuid.replace(/-/g, '');
+  },
+
+  /**
+   * 生成GUID
+   * @returns {function}
+   */
+  generateGUID: (function () {
+    let counter = 0;
+    return function (prefix = '') {
+      counter = counter % (32 * 3);
+      let guid = new Date().getTime().toString(32);
+
+      for (let i = 0; i < 5; i++) {
+        guid += Math.floor(Math.random() * 65535).toString(32);
+      }
+
+      return prefix + guid + (counter++).toString(32);
+    };
+  })(),
+
+  /**
+   * 生成错误文本
+   * @param {*} filename
+   * @param {*} value
+   */
+  generateText(filename, value) {
+    let element = document.createElement('a');
+    element.setAttribute(
+      'href',
+      'data:text/plain;charset=utf-8,' + encodeURIComponent(value),
+    );
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    element.click();
+  },
+
+  /**
+   * RGB颜色转换成十六进制颜色
+   * @param {*} value
+   * @returns
+   */
+  rgbToHex(value) {
+    //十六进制颜色值的正则表达式
+    const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+    // 如果是rgb颜色表示
+    if (/^(rgb|RGB)/.test(value)) {
+      let aColor = value.replace(/(?:\(|\)|rgb|RGB)*/g, '').split(',');
+      let strHex = '#';
+      for (let i = 0; i < aColor.length; i++) {
+        let hex = Number(aColor[i]).toString(16);
+        if (hex.length < 2) {
+          hex = '0' + hex;
+        }
+        strHex += hex;
+      }
+      if (strHex.length !== 7) {
+        strHex = value;
+      }
+      return strHex;
+    } else if (reg.test(value)) {
+      let aNum = value.replace(/#/, '').split('');
+      if (aNum.length === 6) {
+        return value;
+      } else if (aNum.length === 3) {
+        let numHex = '#';
+        for (let i = 0; i < aNum.length; i += 1) {
+          numHex += aNum[i] + aNum[i];
+        }
+        return numHex;
+      }
+    }
+    return value;
+  },
+
+  /**
+   * 十六进制颜色转换成RGB颜色
+   * @param {*} value
+   * @returns
+   */
+  hexToRGA(value) {
+    let sColor = String(value).toLowerCase();
+    //十六进制颜色值的正则表达式
+    const reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+    // 如果是16进制颜色
+    if (sColor && reg.test(sColor)) {
+      if (sColor.length === 4) {
+        let sColorNew = '#';
+        for (let i = 1; i < 4; i += 1) {
+          sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+        }
+        sColor = sColorNew;
+      }
+      //处理六位的颜色值
+      let sColorChange = [];
+      for (let i = 1; i < 7; i += 2) {
+        sColorChange.push(parseInt('0x' + sColor.slice(i, i + 2)));
+      }
+      return 'RGB(' + sColorChange.join(',') + ')';
+    }
+    return sColor;
+  },
+
+  /**
+   * 加载脚本
+   * @param {*} files ['http://127.0.0.1:3000/a.js', 'http://127.0.0.1:3000/b.js'];
+   * @param {*} callback
+   */
+  loadJS(files, callback) {
+    // 获取head标签
+    const head = document.getElementsByTagName('head')[0];
+
+    Promise.all(
+      files.map((file) => {
+        return new Promise((resolve) => {
+          // 创建script标签并添加到head
+          const s = document.createElement('script');
+          s.type = 'text/javascript';
+          s.async = true;
+          s.src = file;
+          // 监听load事件，如果加载完成则resolve
+          s.addEventListener('load', () => resolve(), false);
+          head.appendChild(s);
+        });
+      }),
+    ).then(callback); // 所有均完成，执行用户的回调事件
+  },
+
+  /**
+   * 是否为JSON字符串
+   * @param {*} str
+   * @returns
+   */
+  isJSON(str) {
+    if (typeof str === 'string') {
+      try {
+        let obj = JSON.parse(str);
+        if (typeof obj === 'object' && obj) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (err) {
+        console.error('error：' + str + '!!!' + err);
+        return false;
+      }
+    }
+  },
+
+  /**
+   * 元素是否在视口内
+   * @param {*} element
+   * @returns
+   */
+  isInViewPort(element) {
+    if (element) {
+      const viewWidth =
+        window.innerWidth || document.documentElement.clientWidth;
+      const viewHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const { top, right, bottom, left } = element.getBoundingClientRect();
+      return (
+        top >= 0 && left >= 0 && right <= viewWidth && bottom <= viewHeight
+      );
+    } else {
+      return false;
+    }
+  },
+
+  /**
+   * 函数缓存
+   * @param {*} resultFn
+   * @param {*} isEqual
+   * @returns
+   */
+  memoize(resultFn, isEqual) {
+    /**
+     * 比较方法
+     */
+    function areInputsEqual(newInputs, lastInputs) {
+      if (newInputs.length !== lastInputs.length) {
+        return false;
+      }
+      for (let i = 0; i < newInputs.length; i++) {
+        if (newInputs[i] !== lastInputs[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (isEqual === void 0) {
+      isEqual = areInputsEqual;
+    }
+    let lastThis;
+    let lastArgs = [];
+    let lastResult;
+    let calledOnce = false;
+
+    function memoized() {
+      let newArgs = [];
+      for (let _i = 0; _i < arguments.length; _i++) {
+        newArgs[_i] = arguments[_i];
+      }
+      if (calledOnce && lastThis === this && isEqual(newArgs, lastArgs)) {
+        return lastResult;
+      }
+      lastResult = resultFn.apply(this, newArgs);
+      calledOnce = true;
+      lastThis = this;
+      lastArgs = newArgs;
+      return lastResult;
+    }
+
+    return memoized;
   },
 };
